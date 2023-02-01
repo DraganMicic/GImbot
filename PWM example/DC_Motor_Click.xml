@@ -1,0 +1,13 @@
+<DC_Motor_Click>
+	<Attributes>
+		<Url></Url>
+		<Image>DC_Motor_Click.JPG</Image>
+		<File></File>
+	</Attributes>
+	<Events>
+		<OnLeftClick></OnLeftClick>
+		<OnRightClick></OnRightClick>
+		<OnDblClick></OnDblClick>
+		<OnMouseOver>PreviewImage</OnMouseOver>
+	</Events>
+</DC_Motor_Click>

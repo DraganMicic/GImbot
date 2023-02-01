@@ -1,0 +1,125 @@
+/*
+ * Project name:
+     DC Motor Click Board Example
+ * Copyright:
+     (c) Mikroelektronika, 2014.
+ * Revision History:
+     20140219:
+       - initial release (FJ);
+ * Description:
+     This is a simple demonstration of using the DRV8833 dual bridge motor driver (http://www.ti.com/product/drv8833),
+     which is being used for controlling DC brush motors, a bipolar stepper motor, solenoids, or other inductive loads.
+     The example demonstrates how to change direction of the motor rotation and decay modes :
+       - Press RD7 for left direction, fast decay;
+       - Press RD6 for right direction, fast decay;
+       - Press RD5 for left direction, slow decay;
+       - Press RD4 for right direction, slow decay;
+     To change the speed of the motor, press RD0 or RD1.
+ * Test configuration:
+     MCU:             P18F45K22
+                      http://ww1.microchip.com/downloads/en/DeviceDoc/41412F.pdf
+     Dev.Board:       EasyPIC v7
+                      http://www.mikroe.com/easypic/
+     Oscillator:      HS--PLL, 32.000MHz
+     Ext. Modules:    DC Motor Click - ac:DC_Motor_Click
+                      http://www.mikroe.com/click/dc-motor/
+     SW:              mikroC PRO for PIC   ,
+     00000000000000000000000000000000000000000000000000000000000000000000000000000000
+                      http://www.mikroe.com/mikroc/pic/
+ * NOTES:
+     - Place DC Motor click board at the mikroBUS socket 1 on the EasyPIC v7 board.
+     - Connect the DC motor to OUT1 and OUT2 pins.
+     - Put MOTOR PWR jumper in INT position.
+     - Pull-down PORTD, put J17 in VCC position on the EasyPIC v7 board.
+ */
+
+// Mode selection bits
+sbit SEL1 at LATE1_bit;
+sbit SEL2 at LATE0_bit;
+sbit SEL1_Direction at TRISE1_bit;
+sbit SEL2_Direction at TRISE0_bit;
+
+unsigned int current_duty;
+
+// Initialize GPIO pins
+void InitGPIO() {
+  // Configure AN pins as digital
+  ANSELC = 0;
+  ANSELD = 0;
+  ANSELE = 0;
+
+  // Set speed control pins as input
+  TRISD0_bit = 1;
+  TRISD1_bit = 1;
+
+  // Set mode selection pins as input
+  TRISD7_bit = 1;
+  TRISD6_bit = 1;
+  TRISD5_bit = 1;
+  TRISD4_bit = 1;
+  
+  // Set selection pins as output
+  SEL1_Direction = 0;
+  SEL2_Direction = 0;
+}
+
+// Setup PWM
+void PWM_Setup() {
+  TRISC0_bit = 0;                    // Set RC0 as output
+  current_duty = 0;                  // Initial value for current_duty
+  PWM2_Init(5000);                   // Set PWM frequency/period (according to the DC motor characteristics)
+  PSTR1CON = 0x02;                   // Configure RC0 
+  PSTR2CON = 0x02;                   //   as PWM2 putput
+  PWM2_Set_Duty(current_duty);       // Set current duty for PWM
+  PWM2_Start();                      // Start PWM
+}
+
+void main() {
+   // Initialize GPIO pins
+  InitGPIO();
+  
+  // Setup PWM
+  PWM_Setup();
+
+  // Set initial mode
+  SEL1 = 0;
+  SEL2 = 0;
+      
+  while (1) {
+    // Select left direction, fast decay (MIN speed -> MAX speed)
+    if (Button(&PORTD, 7, 1, 1)) {
+      SEL1 = 0;
+      SEL2 = 0;
+    }
+
+    // Select right direction, fast decay (MIN speed -> MAX speed)
+    if (Button(&PORTD, 6, 1, 1)) {
+      SEL1 = 0;
+      SEL2 = 1;
+    }
+
+    // Select left direction, slow decay (MAX speed -> MIN speed)
+    if (Button(&PORTD, 5, 1, 1)) {
+      SEL1 = 1;
+      SEL2 = 1;
+    }
+
+    // Select right direction, slow decay (MAX speed -> MIN speed)
+    if (Button(&PORTD, 4, 1, 1)) {
+      SEL1 = 1;
+      SEL2 = 0;
+    }
+
+    // Increase/decrease motor speed
+    if (Button(&PORTD, 1, 5, 1)) {            //  If RD1 button pressed
+      current_duty = current_duty + 1;        //    increment current_duty
+      PWM2_Set_Duty(current_duty);            //  set newly acquired duty ratio
+     }
+
+    // Increase/decrease motor speed
+    if (Button(&PORTD, 0, 5, 1)) {            // If RD0 button pressed
+      current_duty = current_duty - 1;        //   decrement current_duty
+      PWM2_Set_Duty(current_duty);            // set newly acquired duty ratio
+    }
+  }
+}

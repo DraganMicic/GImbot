@@ -1,0 +1,13 @@
+<Proximity_click>
+	<Attributes>
+		<Url></Url>
+		<Image>proximity_click_thumb.jpg</Image>
+		<File></File>
+	</Attributes>
+	<Events>
+		<OnLeftClick></OnLeftClick>
+		<OnRightClick></OnRightClick>
+		<OnDblClick></OnDblClick>
+		<OnMouseOver>PreviewImage</OnMouseOver>
+	</Events>
+</Proximity_click>

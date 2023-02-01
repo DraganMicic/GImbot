@@ -1,0 +1,26 @@
+main
+	pwm1
+		int2double
+			NRM3232
+				RES032
+				SETFUN32
+				FIXSIGN32
+		Compare_Double
+		Equals_Double
+	pwm2
+		int2double
+			NRM3232
+				RES032
+				SETFUN32
+				FIXSIGN32
+		Compare_Double
+		Equals_Double
+	Compare_Double
+interrupt
+	Add_32x32_FP
+		NRM4032
+			SETFUN32
+			FIXSIGN32
+			SETFOV32
+			RES032
+		SETFOV32

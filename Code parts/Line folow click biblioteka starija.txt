@@ -1,0 +1,125 @@
+ //ovo je kod za line folow click
+ // ukljuci gornji adc int na RA0 i uklju?i sviceve 1.1 i 2.1  i jumpere j3 i j4 stavi na USB UART
+
+#include <built_in.h>
+
+char uart_rd;
+
+int U3R;
+int U3;
+int U2R;
+int U2;
+int U1R;
+int U1;
+int U4R;
+int U4;
+int U5R;
+int U5;
+
+int cal; //za granicu belo crno
+
+void sija(int c) {
+     switch(c){
+               case 1: latD0_bit=1; break;
+               case 2: latD1_bit=1; break;
+               case 3: latD2_bit=1; break;
+               case 4: latD3_bit=1; break;
+               case 5: latD4_bit=1; break;
+               case 6: latD5_bit=1; break;
+               case 7: latD6_bit=1; break;
+               case 8: latD7_bit=1; break;
+               case 9: latE0_bit=1; break;
+     }
+}
+
+void ridd (){
+     U5R = ADC_Read(4);
+     U4R = ADC_Read(3);
+     U3R = ADC_Read(2);
+     U2R = ADC_Read(1);
+     U1R = ADC_Read(0);
+     
+     if (U1R > cal){U1 = 1;}
+     if (U1R < cal){U1 = 0;}
+
+     if (U2R > cal){U2 = 1;}
+     if (U2R < cal){U2 = 0;}
+ 
+     if (U3R > cal){U3 = 1;}
+     if (U3R < cal){U3 = 0;}
+
+     if (U4R > cal){U4 = 1;}
+     if (U4R < cal){U4 = 0;}
+
+     if (U5R > cal){U5 = 1;}
+     if (U5R < cal){U5 = 0;}
+}
+void all0 () { LATE=0x00;LATD=0x00;}
+
+void main() {
+
+  cal = 110;
+
+  ANSELA = 0x2F;             // Configure RA1 pin as analog
+  ANSELC = 0;                // Configure PORTC pins as digital
+  ANSELD = 0;                // Configure PORTD pins as digital
+  ANSELE = 0;
+
+  TRISA = 0x2F;              // Set RA1 pin as input
+  TRISC = 0x00;              // Set PORTC as output
+  TRISD = 0x00; 
+  TRISE = 0x00;
+  
+  LATA=0x00;
+  all0();
+
+  UART1_Init(9600);               // Initialize UART module at 9600 bps
+  Delay_ms(100);
+
+  //UART1_Write(13);
+  //UART1_Write(10);
+
+  while (1) {
+
+    ridd();
+    if(U1==1 && U2==0){sija(1);}                                      //po 1
+    if(U1==1 && U2==1 && U3==0){sija(2);sija(3);}                     //po 2
+    if(U1==0 && U2==1 && U3==0){sija(3);sija(4);}                     //po 1
+    
+    if(U1==1 && U2==1 && U3==1 && U4==0&& U5==0){sija(3);sija(4);}        //po3
+    
+    if(U1==1 && U2==1 && U3==1 && U4==1 && U5==0){sija(4);sija(5);}       //po 4
+    if(U1==0 && U2==1 && U3==1 && U4==1 && U5==1){sija(5);sija(6);}                //po 4
+    if(U1==1 && U2==1 && U3==1 && U4==1 && U5==1){sija(4);sija(5);sija(6);}             //po 5
+    
+    if(U1==0 && U2==1 && U3==1 && U4==0){sija(4);sija(5);}              //po 2
+    if(U2==0 && U3==1 && U4==0 ){sija(5);}                              //po 1
+    if(U2==0 && U3==1 && U4==1 && U5==0){sija(5);sija(6);}          //po 2
+      
+      if(U1==0 && U2==1 && U3==1 && U4==1 && U5==0){sija(5);}       //po 3
+    
+    if(U3==0 && U4==1 && U5==0 ){sija(6);sija(7);}                    //po 1
+    if(U3==0 && U4==1 && U5==1 ){sija(7);sija(8);}                         //po 2
+    if(U4==0 && U5==1 ){sija(9);}                                                //po 1
+     
+     if(U1==0 && U2==0 && U3==1 && U4==1 && U5 == 1){sija(6);sija(7);}    //po 3
+    
+    
+    Delay_ms(10);
+    all0();
+    
+
+
+    
+    
+    
+    //LATC = adc_rd;
+    //LATD = Hi(adc_rd);
+
+    uart_rd = UART1_Read();     // read the received data,
+     UART1_Write(U5R);       // and send data via UART
+     UART1_Write(hi(U5R));
+
+
+  }
+}

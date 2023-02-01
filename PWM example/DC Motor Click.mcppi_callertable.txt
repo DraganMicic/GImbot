@@ -1,0 +1,11 @@
+main
+	InitGPIO
+	PWM_Setup
+		PWM2_Init
+		PWM2_Set_Duty
+			Mul_16X16_U
+		PWM2_Start
+	Button
+		Delay_500us
+	PWM2_Set_Duty
+		Mul_16X16_U

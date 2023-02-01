@@ -1,0 +1,115 @@
+//     - Place Proximity click into mikroBUS socket 1.
+//     Place Buzzer selection Jumper (J21) on RE1 pi
+// Turn ON LEDS on PortD (SW3.4)
+
+#include "VCNL40x0.h"
+
+unsigned char i_loop;
+unsigned char Command;
+unsigned int ProxiValue;
+unsigned int AverageProxiValue;
+unsigned int AmbiValue;
+unsigned long int SummProxiValue;
+unsigned char InterruptStatus;
+unsigned char LoByte, HiByte;
+char temp_text[7];
+
+
+
+void VCNL_Set_default_Mode(){
+
+  ByteToStr(VCNL_RdSingle(REGISTER_ID),temp_text);
+  VCNL_WrSingle(REGISTER_PROX_CURRENT, 20);
+  ByteToStr(VCNL_RdSingle(REGISTER_PROX_CURRENT),temp_text);
+  VCNL_WrSingle(REGISTER_PROX_RATE, PROX_MEASUREMENT_RATE_31);
+  ByteToStr(VCNL_RdSingle(REGISTER_PROX_RATE), temp_text);
+  VCNL_WrSingle(REGISTER_COMMAND, COMMAND_PROX_ENABLE | COMMAND_AMBI_ENABLE | COMMAND_SELFTIMED_MODE_ENABLE);
+  ByteToStr(VCNL_RdSingle(REGISTER_COMMAND), temp_text);
+  VCNL_WrSingle(REGISTER_INTERRUPT_CONTROL, INTERRUPT_THRES_SEL_PROX | INTERRUPT_THRES_ENABLE | INTERRUPT_COUNT_EXCEED_1);
+  ByteToStr(VCNL_RdSingle(REGISTER_INTERRUPT_CONTROL), temp_text);
+  VCNL_WrSingle(REGISTER_AMBI_PARAMETER, AMBI_PARA_AVERAGE_32 | AMBI_PARA_AUTO_OFFSET_ENABLE | AMBI_PARA_MEAS_RATE_2);
+  ByteToStr(VCNL_RdSingle(REGISTER_AMBI_PARAMETER), temp_text);
+
+}
+
+void main() {
+  ANSELA = 0;
+  ANSELB = 0;
+  ANSELC = 0;
+  ANSELD = 0;
+  ANSELE = 0;
+  SLRCON = 0;
+
+  // init PORTD as output
+  TRISD = 0;
+  TRISB = 0;
+  TRISE = 0;
+  TRISB0_bit = 1;     //<<<<<<<<<<<<< pin
+  LATB = 0x00;
+  LATD = 0x00;
+  LATE = 0x00;
+  // Init Buzzer
+  Sound_Init(&PORTE, 1);
+
+  // Init I2C
+  I2C1_Init(100000);
+  I2C1_Stop();
+  // Set Default mode of operation for VCNL4000 chip
+  VCNL_Set_default_Mode();
+
+  // Measure average of proximity value
+  // it will be used to set threshold value
+  SummProxiValue = 0;
+  for (i_loop = 0; i_loop < 16; i_loop++) {
+    do { // wait on prox data ready bit
+      Command = VCNL_RdSingle(REGISTER_COMMAND);
+    } while (!(Command & COMMAND_MASK_PROX_DATA_READY)); // prox data ready ?
+    VCNL_RdSeq(REGISTER_PROX_VALUE, &data_, 2);
+    ProxiValue = (data_[0] << 8) | data_[1];
+    SummProxiValue += ProxiValue; // Summ of all measured prox values
+  }
+  AverageProxiValue = SummProxiValue / 16; // calculate average
+
+  LoByte = (unsigned char)((AverageProxiValue + 20) & 0x00FF);
+  HiByte = (unsigned char)(((AverageProxiValue + 20) & 0xFF00) >> 8);
+  VCNL_WrSingle(REGISTER_INTERRUPT_HIGH_THRES, HiByte);
+  VCNL_WrSingle(REGISTER_INTERRUPT_HIGH_THRES + 1, LoByte);
+  WordToStr(AverageProxiValue + 20, temp_text);
+  LATB = 0x00;
+
+  while(1){
+    // wait on data ready bit
+    do{
+      Command = VCNL_RdSingle(REGISTER_COMMAND);
+    }while (!(Command & (COMMAND_MASK_PROX_DATA_READY | COMMAND_MASK_AMBI_DATA_READY))); // data ready ?
+
+    // read interrupt status register
+    InterruptStatus = VCNL_RdSingle(REGISTER_INTERRUPT_STATUS);
+    // check interrupt status for High Threshold
+    if(InterruptStatus & INTERRUPT_MASK_STATUS_THRES_HI){
+      VCNL_WrSingle(REGISTER_INTERRUPT_STATUS, InterruptStatus);
+    }
+
+    // prox value ready for using
+    if(Command & COMMAND_MASK_PROX_DATA_READY){
+      // read proximity value
+      VCNL_RdSeq(REGISTER_PROX_VALUE, &data_, 2);
+      ProxiValue = (data_[0] << 8) | data_[1];
+      // display proximity value
+      WordToStr(ProxiValue, temp_text);
+
+
+      // check the range of the proximity
+      if(ProxiValue < (AverageProxiValue + 50)){
+
+        LATB7_bit=0;
+      }
+      if((ProxiValue > (AverageProxiValue + 50))) {
+
+        LATB7_bit=1;
+       }
+     }
+   }
+    // small delay inside main loop
+    delay_ms(30);
+}

@@ -1,0 +1,16 @@
+0	1	mikroCPIC1618.exe -MSF -DBG -pP18F45K22 -DL -O11111114 -fo16 -N"R:\GIMBOT\Gimbot final code\EasyPIC v7 - PIC18F45K22\Proximity_click.mcppi" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\Defs\" -SP"C:\Users\Public\Documents\Mikroelektronika\mikroC PRO for PIC\uses\P18\" -SP"R:\GIMBOT\Gimbot final code\EasyPIC v7 - PIC18F45K22\" "Proximity_click.c" "VCNL40x0.c" "__Lib_Math.mcl" "__Lib_MathDouble.mcl" "__Lib_System.mcl" "__Lib_Delays.mcl" "__Lib_CString.mcl" "__Lib_Conversions.mcl" "__Lib_Sound.mcl" "__Lib_ADC_A_D.mcl" "__Lib_I2C_c34d01.mcl" "__Lib_UART_c67d67.mcl" "__Lib_LcdConsts.mcl" "__Lib_Lcd.mcl"	 
+hint: 0	1139	Available RAM: 1515 [bytes], Available ROM: 32768 [bytes]	 
+diagnostics: 0	122	Compilation Started	__Lib_Delays.c
+diagnostics: 172	123	Compiled Successfully	__Lib_Delays.c
+diagnostics: 0	122	Compilation Started	vcnl40x0.h
+warning: 144	1503	Result is not defined in function: 'calculate'	Proximity_click.c
+diagnostics: 295	123	Compiled Successfully	Proximity_click.c
+diagnostics: 0	122	Compilation Started	vcnl40x0.h
+diagnostics: 62	123	Compiled Successfully	VCNL40x0.c
+diagnostics: 0	127	All files Compiled in 125 ms	 
+hint: 0	1144	Used RAM (bytes): 100 (7%)  Free RAM (bytes): 1415 (93%)	Used RAM (bytes): 100 (7%)  Free RAM (bytes): 1415 (93%)
+hint: 0	1144	Used ROM (bytes): 6830 (21%)  Free ROM (bytes): 25938 (79%)	Used ROM (bytes): 6830 (21%)  Free ROM (bytes): 25938 (79%)
+diagnostics: 0	125	Project Linked Successfully	Proximity_click.mcppi
+diagnostics: 0	128	Linked in 46 ms	 
+diagnostics: 0	129	Project 'Proximity_click.mcppi' completed: 250 ms	 
+diagnostics: 0	103	Finished successfully: 15 Jul 2016, 17:39:47	Proximity_click.mcppi

@@ -1,0 +1,79 @@
+ //     3 TAJMERA NA 3 PORTA //
+
+unsigned cnt;
+unsigned short cnt2;
+unsigned short cnt3;
+
+void interrupt() {              //<<<<<<<<<<<<<<<<<<<<<<<odve su definisane Interapt finkcije i njih nigde ne kopiras same se pozivaju
+     if (TMR0IF_bit) {
+        cnt++;                 // increment counter
+        TMR0IF_bit = 0;        // clear TMR0IF
+        TMR0L = 0;             // set TMR0 for aproximetly 1 sec
+         
+        cnt3++;                    // increment counter
+        TMR2IF_bit = 0;           // clear TMR2IF
+        TMR2 = 0;
+          
+        cnt2++;                    // increment counter
+        TMR1IF_bit = 0;           // clear TMR0IF
+        TMR1H = 0x80;
+        TMR1L = 0x00;
+     }
+}
+
+void main() {
+  //setovanje pinovaaa//
+  
+  ANSELB = 0;              // Configure AN pins as digital
+  TRISB  = 0;              // PORTB is output
+  LATB = 0xFF;  
+    
+  ANSELC = 0;              // Configure AN pins as digital
+  TRISC  = 0;              // PORTB is output
+  LATC = 0xFF;           // Initialize PORTB
+  
+  ANSELD = 0;              // Configure AN pins as digital
+  TRISD  = 0;              // PORTB is output
+  LATD = 0xFF;
+  
+  INTCON = 0xC0;
+
+
+  //Setovanje tajmeraa 0 1//  ne diraj redosled linija i nikud nista ne prebacuj vako radi a ako radi ne diraj ga//
+
+  TMR0L = 0;               // Timer0 initial value
+  T0CON = 0xC7;            // Set TMR0 to 8bit mode and prescaler to 256
+  GIE_bit = 1;             // Enable global interrupt
+  TMR0IE_bit = 1;          // Enable Timer0 interrupt
+  cnt = 0;                      // initialize cnt
+  
+  T1CON = 0x21;               // Timer1 settings
+  TMR1IF_bit = 0;             // clear TMR1IF
+  TMR1H = 0x80;               // Initialize Timer1 register
+  TMR1L = 0x00;
+  TMR1IE_bit = 1;             // enable Timer1 interrupt
+  cnt2 =   0;                  // initialize cnt
+  INTCON = 0xC0;              // Set GIE, PEIE
+  
+  cnt3 = 0;                    // initialize cnt
+  T2CON = 0xFF;               // Timer2 settings
+  TMR2  =   0;                // Initialize Timer2 register
+  //TMR2IE_bit = 1;             // enable interupt
+  INTCON = 0xC0;              // Set GIE, PEIE
+
+
+  do {
+    if (cnt >= 24) {
+      LATB = ~PORTB;      // Toggle PORTB LEDs
+      cnt = 0;             // Reset cnt
+    }
+       if (cnt2 >= 24) {
+      LATC  = ~PORTC;        // Toggle PORTB LEDs
+      cnt2= 0;                // Reset cnt
+    }
+    if (cnt3 >= 24) {
+      LATD = ~PORTD;         // Toggle PORTB LEDs
+      cnt3 = 0;                // Reset cnt
+    }
+  } while(1);
+}

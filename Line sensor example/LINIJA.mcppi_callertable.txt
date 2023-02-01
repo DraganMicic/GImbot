@@ -1,0 +1,7 @@
+main
+	all0
+	ridd
+		ADC_Read
+			Delay_22us
+	preracunaj
+		mod

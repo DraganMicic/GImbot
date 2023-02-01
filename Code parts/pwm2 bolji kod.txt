@@ -1,0 +1,85 @@
+ //     3 TAJMERA NA 3 PORTA //
+
+float cnt1;        //promenljive za tajmere
+float cnt2;
+float cnt3;
+
+
+void interrupt() {              //<<<<<<<<<<<<<<<<<<<<<<<odve su definisane Interapt finkcije i njih nigde ne kopiras same se pozivaju
+     if (TMR0IF_bit) {
+        cnt1=cnt1+1;                 // increment counter
+        cnt2=cnt2+1;                    // increment counter
+        cnt3=cnt3+1;
+                        // increment counter
+
+        TMR0IF_bit = 0;        // clear TMR0IF
+        TMR0L = 0;             // set TMR0 for aproximetly 1 sec
+     }
+}
+
+void pwm1(int t1up, int t1down){
+     if(cnt1<=t1up){LATB5_bit=1;}
+     if(cnt1>=t1up&&cnt1<=t1up+t1down){LATB5_bit=0;}
+     if(cnt1>=t1up+t1down){cnt1=0;}
+
+}
+void pwm2(int t2up, int t2down){
+     if(cnt2<=t2up){LATB6_bit=1;}
+     if(cnt2>=t2up&&cnt2<=t2up+t2down){LATB6_bit=0;}
+     if(cnt2>=t2up+t2down){cnt2=0;}
+
+}
+
+void main() {
+     //setovanje pinovaaa//
+  cnt1 = 0;
+  cnt2 =   0;
+  cnt3 = 0;
+
+  ANSELB = 0;              // Configure AN pins as digital
+  TRISB  = 0;              // PORTB is output
+  LATB = 0x00;
+
+  ANSELC = 0;              // Configure AN pins as digital
+  TRISC  = 0;              // PORTB is output
+  LATC = 0x00;           // Initialize PORTB
+  tRISC0_BIT=1;
+  
+  ANSELD = 0;              // Configure AN pins as digital
+  TRISD  = 0;              // PORTB is output
+  LATD = 0x00;
+
+  ANSELE = 0;              // Configure AN pins as digital
+  TRISE  = 0;              // PORTB is output
+  LATE = 0xFF;
+
+  INTCON = 0xC0;                   //setovanje tajmera
+  T0CON         = 0xC2;
+  TMR0L         = 0;           // Set TMR0 to 8bit mode and prescaler to 256
+  GIE_bit = 1;             // Enable global interrupt
+  TMR0IE_bit = 1;          // Enable Timer0 interrupt
+      /*LATB5_bit=1;
+      LATB6_bit=1;
+      Delay_ms(10);
+        LATB5_bit=0;
+      LATB6_bit=0;*/
+
+  while(1) {
+
+     // pwm1(100,100);       //levi
+       // pwm2(5,40);       //levi
+   if(RC0_bit==1){ LATD=0xFF;pwm1(4,40);       //levi
+      pwm2(100,400);     }      //levi
+       
+       else{LATD=0x00; pwm1(100,400);pwm2(4,40);      //levi
+         }
+      
+      
+      //   pwm1(100,0);    */
+
+   /*if (cnt5 >= 1000) {
+      LATD = ~PORTD;         // Toggle PORTB LEDs
+      cnt5 = 0;                // Reset cnt
+    }   */
+  }
+}

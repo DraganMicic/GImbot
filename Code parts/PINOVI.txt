@@ -1,0 +1,9 @@
+Zuzeto 
+C3,C4 (I2C com za proksimiti)
+BO(neki signal, možda može da se premosti, za proksimiti)
+B7(signal da je preden range)
+E1 --- ? trepti kad sija B7
+B2,B3,B4(koriste se u ocitavanju za proksimiti na pocetku) 
+
+A0,A1,A2,A3,A5 - LINE FOLOW
+ 
